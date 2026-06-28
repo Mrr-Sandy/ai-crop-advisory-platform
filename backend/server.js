@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const cropRoutes = require("./routes/cropRoute")
 const app = express();
 
@@ -9,6 +10,7 @@ app.get("/", (req,res)=>{
         res.send("backend is running");
 });
 
+app.use(cors());
 app.use(express.json());
 app.use("/api/crops",cropRoutes);
 
