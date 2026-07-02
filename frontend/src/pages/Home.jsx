@@ -5,7 +5,7 @@ import Hero from "../components/Hero";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 
-const CROPS_API_URL = "http://localhost:5000/api/crops";
+const CROPS_API_URL = "/api/crops";
 
 function Home() {
   const [crops, setCrops] = useState([]);
