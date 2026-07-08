@@ -1,50 +1,29 @@
-/**
- * Modal Component
- * Props:
- * - isOpen: boolean
- * - title: string
- * - children: ReactNode
- * - onClose: function
- */
-
 function Modal({ isOpen, title, children, onClose }) {
   if (!isOpen) return null;
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(0,0,0,0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
-      <div
-        style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "8px",
-          minWidth: "300px",
-        }}
-      >
-        <h3>{title}</h3>
+      <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-start justify-between gap-4">
+          <h3 id="modal-title" className="text-lg font-semibold text-slate-950 dark:text-white">
+            {title}
+          </h3>
 
-        <div>{children}</div>
-
-        <button
-          onClick={onClose}
-          style={{
-            marginTop: "10px",
-            padding: "8px 15px",
-          }}
-        >
-          Close
-        </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md px-2 py-1 text-sm text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-green-700 dark:hover:bg-slate-800 dark:hover:text-white"
+            aria-label="Close dialog"
+          >
+            Close
+          </button>
+        </div>
+        <div className="mt-5">{children}</div>
       </div>
     </div>
   );

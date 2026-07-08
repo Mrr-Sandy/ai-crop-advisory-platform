@@ -1,16 +1,105 @@
 # AI Crop Advisory Platform
 
-AI-powered crop advisory and farmer assistance platform for TBI GEU SIP 2026.
+AI Crop Advisory Platform is a React and Express application for managing crop information such as crop name, season, soil type, and water requirement. The frontend presents the data as a professional SaaS interface while preserving the completed backend contract.
 
-## Project Description
+## Screenshots
 
-This project uses a Node.js and Express backend with a React, Vite, React Router, and Tailwind CSS frontend. The frontend fetches crop data from the backend API and displays crop details such as crop name, season, soil type, and water requirement.
+Screenshots should be captured from the running product after deployment or local verification:
+- Landing page crop directory
+- Dashboard crop management
+- Mobile dashboard layout
+- Dark mode dashboard
 
-## Backend Setup
+## Folder Structure
+
+```text
+ai-crop-advisory-platform/
+  backend/
+    models/
+    routes/
+    server.js
+  frontend/
+    src/
+      api/
+      components/
+      pages/
+  docs/
+    README.md
+    design/
+  schema-diagram.png
+  vercel.json
+```
+
+## Tech Stack
+
+- Frontend: React, Vite, React Router, Tailwind CSS, Lucide React
+- Backend: Node.js, Express, Mongoose
+- Database: MongoDB Atlas
+- Deployment config: Vercel rewrites for `/api`
+
+## Backend Contract
+
+The backend is treated as production-ready. Frontend code uses the existing crop API without changing routes, methods, response structure, schema, controllers, models, or database integration.
+
+```text
+GET    /api/crops
+GET    /api/crops/search?name=value
+GET    /api/crops/:id
+POST   /api/crops
+PUT    /api/crops/:id
+DELETE /api/crops/:id
+```
+
+Crop fields:
+- `_id`
+- `name`
+- `season`
+- `soil`
+- `water`
+
+## Design System
+
+The design system lives in `docs/design/` and is the single source of truth for UI decisions. It defines brand guidelines, colors, typography, spacing, components, page layouts, responsive behavior, animation, iconography, accessibility, UI patterns, design decisions, and roadmap.
+
+Read first:
+
+```text
+docs/design/00_DESIGN_VISION.md
+```
+
+## UI Features
+
+- Premium SaaS landing page
+- Real API-backed crop directory
+- Dashboard with crop statistics derived from backend responses
+- Crop search through the existing search endpoint
+- Create crop through the existing POST endpoint
+- Update crop through the existing PUT endpoint
+- Delete crop through the existing DELETE endpoint
+- Loading, empty, success, and error states
+- Dark mode
+- Responsive layouts
+- Accessible forms, buttons, dialogs, and status messaging
+
+## Setup Instructions
+
+### Backend
 
 ```bash
 cd backend
 npm install
+```
+
+Create `backend/.env`:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+PORT=5000
+```
+
+Start the backend:
+
+```bash
 node server.js
 ```
 
@@ -20,13 +109,7 @@ Backend runs at:
 http://localhost:5000
 ```
 
-Crop API endpoint:
-
-```text
-GET http://localhost:5000/api/crops
-```
-
-## Frontend Setup
+### Frontend
 
 ```bash
 cd frontend
@@ -40,49 +123,44 @@ Frontend runs at the URL shown by Vite, usually:
 http://localhost:5173
 ```
 
-## Database
+The Vite development server proxies `/api` to `http://localhost:5000`, so frontend code continues using the same relative API URLs used in production.
 
-**Database Used:** MongoDB Atlas
+## Development Workflow
 
-### Why MongoDB?
+1. Update the relevant design document before changing UI behavior.
+2. Identify the backend API, React consumer, state store, and UI elements.
+3. Implement frontend-only changes.
+4. Verify loading, error, search, create, update, delete, and empty states.
+5. Run lint and build checks.
 
-MongoDB is a NoSQL database that provides flexible document storage and integrates easily with Mongoose for Node.js applications.
+## Documentation Guide
 
-## Database Schema
+- `docs/README.md`: documentation overview and workflow
+- `docs/design/README.md`: design document map
+- `docs/design/00_DESIGN_VISION.md`: product experience direction
+- `docs/design/05_COMPONENT_LIBRARY.md`: reusable component rules
+- `docs/design/12_UI_PATTERNS.md`: API-backed UI workflows
+- `docs/design/14_UI_ROADMAP.md`: future UI that needs backend support
 
-Entity: Crop
+## Future Scope
 
-Fields:
-- _id
-- name
-- season
-- soil
-- water
+- Real weather insights after a backend weather endpoint exists
+- Authentication pages after auth APIs exist
+- Analytics charts after analytics APIs exist
+- Crop images after image fields or media endpoints exist
+- Role-based workflows for farmers, officers, students, and researchers
 
-(Schema diagram attached below.)
+## Contributing Guidelines
 
-## Database Setup
+- Do not modify backend routes, models, controllers, schema, response shapes, or MongoDB integration unless the project owner explicitly asks.
+- Do not use mock data or fake JSON in production UI.
+- Keep visible data bound to real API responses.
+- Update documentation before design system changes.
+- Run frontend lint and build checks before submitting changes.
 
-1. Create a `.env` file inside the backend folder.
-2. Add the following variables:
+## License
 
-```env
-MONGO_URI=your_mongodb_connection_string
-PORT=5000
-```
-
-3. Install dependencies:
-
-```bash
-cd backend
-npm install
-```
-
-4. Start the backend:
-
-```bash
-node server.js
-```
+This project is maintained for educational and demonstration use. Add an explicit license file before public redistribution.
 
 ## Database Schema
 

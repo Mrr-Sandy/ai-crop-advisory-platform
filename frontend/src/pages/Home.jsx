@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
 import Card from "../components/Card";
 import Footer from "../components/Footer";
-
-const CROPS_API_URL = "/api/crops";
+import Hero from "../components/Hero";
+import Navbar from "../components/Navbar";
+import { Loader } from "../components/ui";
+import { getCrops } from "../api/crops";
 
 function Home() {
   const [crops, setCrops] = useState([]);
@@ -19,17 +19,8 @@ function Home() {
       try {
         setIsLoading(true);
         setError("");
-
-        const response = await fetch(CROPS_API_URL, {
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch crops");
-        }
-
-        const data = await response.json();
-        setCrops(Array.isArray(data) ? data : []);
+        const data = await getCrops({ signal: controller.signal });
+        setCrops(data);
       } catch (err) {
         if (err.name === "AbortError") {
           return;
@@ -53,36 +44,57 @@ function Home() {
   return (
     <>
       <Navbar />
-
       <Hero />
 
-      <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        {isLoading && (
-          <p className="rounded-lg bg-white p-6 text-center text-gray-600 shadow-md dark:bg-gray-800 dark:text-gray-300">
-            Loading crops...
-          </p>
-        )}
-
-        {!isLoading && error && (
-          <p className="rounded-lg bg-white p-6 text-center text-red-600 shadow-md dark:bg-gray-800 dark:text-red-300">
-            {error}
-          </p>
-        )}
-
-        {!isLoading && !error && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-            {crops.map((crop) => (
-              <Card
-                key={crop.id}
-                name={crop.name}
-                season={crop.season}
-                soil={crop.soil}
-                water={crop.water}
-              />
-            ))}
+      <main className="bg-white dark:bg-slate-950">
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
+                Crop directory
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+                Records from the crop API
+              </h2>
+            </div>
+            <p className="max-w-xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              Each card displays real fields returned by the existing backend:
+              name, season, soil, and water requirement.
+            </p>
           </div>
-        )}
-      </section>
+
+          {isLoading && <Loader text="Loading crops from the backend..." />}
+
+          {!isLoading && error && (
+            <div
+              className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm font-medium text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          {!isLoading && !error && crops.length === 0 && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              No crop records were returned by the backend.
+            </div>
+          )}
+
+          {!isLoading && !error && crops.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {crops.map((crop) => (
+                <Card
+                  key={crop._id || crop.id || crop.name}
+                  name={crop.name}
+                  season={crop.season}
+                  soil={crop.soil}
+                  water={crop.water}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
 
       <Footer />
     </>

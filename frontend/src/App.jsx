@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
