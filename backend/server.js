@@ -1,10 +1,11 @@
 require("dotenv").config();
 
+
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cropRoutes = require("./routes/cropRoute");
-
+const authRoutes = require("./routes/authRoutes");
 const app = express();
 
 
@@ -23,6 +24,7 @@ app.get("/", (req,res)=>{
 app.use(cors());
 app.use(express.json());
 app.use("/api/crops",cropRoutes);
+app.use("/api/auth", authRoutes);
 
 if (require.main === module) {
     app.listen(PORT,()=>{
