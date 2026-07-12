@@ -33,13 +33,13 @@ ai-crop-advisory-platform/
 ## Tech Stack
 
 - Frontend: React, Vite, React Router, Tailwind CSS, Lucide React
-- Backend: Node.js, Express, Mongoose
+- Backend: Node.js, Express, Mongoose, JWT, bcrypt, Passport.js
 - Database: MongoDB Atlas
 - Deployment config: Vercel rewrites for `/api`
 
 ## Backend Contract
 
-The backend is treated as production-ready. Frontend code uses the existing crop API without changing routes, methods, response structure, schema, controllers, models, or database integration.
+The backend exposes crop management APIs and authentication APIs. Frontend code uses the existing crop API without changing routes, methods, response structure, schema, controllers, models, or database integration.
 
 ```text
 GET    /api/crops
@@ -56,6 +56,48 @@ Crop fields:
 - `season`
 - `soil`
 - `water`
+
+## Authentication
+
+Week 6 authentication is implemented across the MERN stack.
+
+Backend features:
+- User registration with `bcrypt` password hashing
+- Login with JWT generation
+- Protected profile API with `verifyToken`
+- Login input validation with `express-validator`
+- Login rate limiting with `express-rate-limit`
+- Google OAuth with `passport`, `passport-google-oauth20`, and `express-session`
+- Proper HTTP status codes and JSON error messages
+
+Authentication routes:
+
+```text
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/profile
+GET    /api/auth/google
+GET    /api/auth/google/callback
+```
+
+Frontend features:
+- Working Register and Login pages
+- JWT storage in `localStorage`
+- Protected Dashboard route
+- Logout with token removal and redirect to Login
+- Navbar updates after login/logout
+- Loading states and user-friendly error messages
+- Google login button that opens the backend OAuth route
+
+Google OAuth flow:
+
+1. User clicks `Continue with Google`.
+2. Frontend opens `http://localhost:5000/api/auth/google`.
+3. Passport redirects the user to Google.
+4. Google redirects back to `/api/auth/google/callback`.
+5. Backend finds or creates the user in MongoDB.
+6. Backend generates a JWT and redirects to the frontend Login page with the token.
+7. Frontend stores the JWT and redirects to Dashboard.
 
 ## Design System
 
@@ -95,6 +137,12 @@ Create `backend/.env`:
 ```env
 MONGO_URI=your_mongodb_connection_string
 PORT=5000
+JWT_SECRET=your_jwt_secret
+SESSION_SECRET=your_session_secret
+CLIENT_URL=http://localhost:5173
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
 ```
 
 Start the backend:
@@ -131,7 +179,8 @@ The Vite development server proxies `/api` to `http://localhost:5000`, so fronte
 2. Identify the backend API, React consumer, state store, and UI elements.
 3. Implement frontend-only changes.
 4. Verify loading, error, search, create, update, delete, and empty states.
-5. Run lint and build checks.
+5. Verify register, login, protected routes, logout, and Google OAuth after auth changes.
+6. Run lint and build checks.
 
 ## Documentation Guide
 
@@ -145,7 +194,6 @@ The Vite development server proxies `/api` to `http://localhost:5000`, so fronte
 ## Future Scope
 
 - Real weather insights after a backend weather endpoint exists
-- Authentication pages after auth APIs exist
 - Analytics charts after analytics APIs exist
 - Crop images after image fields or media endpoints exist
 - Role-based workflows for farmers, officers, students, and researchers
