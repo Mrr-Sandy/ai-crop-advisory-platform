@@ -1,16 +1,41 @@
 import { Leaf, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { clearToken, getToken } from "../api/auth";
 
 function Navbar() {
+  const navigate = useNavigate();
+
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
   );
+
+  const [token, setTokenState] = useState(getToken());
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  useEffect(() => {
+    const handleAuthChange = () => {
+      setTokenState(getToken());
+    };
+
+    window.addEventListener("storage", handleAuthChange);
+    window.addEventListener("auth-change", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+      window.removeEventListener("auth-change", handleAuthChange);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    clearToken();
+    setTokenState(null);
+    navigate("/login");
+  };
 
   const navClass = ({ isActive }) =>
     `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
@@ -22,26 +47,53 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
       <nav className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        <Link to="/" className="flex items-center gap-2 text-slate-950 dark:text-white">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-slate-950 dark:text-white"
+        >
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-700 text-white">
             <Leaf className="h-5 w-5" aria-hidden="true" />
           </span>
-          <span className="text-base font-semibold">AI Crop Advisory</span>
+
+          <span className="text-base font-semibold">
+            AI Crop Advisory
+          </span>
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
           <NavLink to="/" className={navClass}>
             Home
           </NavLink>
+
           <NavLink to="/about" className={navClass}>
             About
           </NavLink>
-          <NavLink to="/dashboard" className={navClass}>
-            Dashboard
-          </NavLink>
-          <NavLink to="/login" className={navClass}>
-            Login
-          </NavLink>
+
+          {token ? (
+            <>
+              <NavLink to="/dashboard" className={navClass}>
+                Dashboard
+              </NavLink>
+
+              <button
+                onClick={handleLogout}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className={navClass}>
+                Login
+              </NavLink>
+
+              <NavLink to="/register" className={navClass}>
+                Register
+              </NavLink>
+            </>
+          )}
+
           <button
             type="button"
             onClick={() => setDarkMode(!darkMode)}

@@ -1,33 +1,21 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { LockKeyhole } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { Button, Input } from "../components/ui";
-import { getGoogleLoginUrl, loginUser, setToken } from "../api/auth";
+import { registerUser } from "../api/auth";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
-
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
-  const [message, setMessage] = useState(location.state?.message || "");
-  const [error, setError] = useState(searchParams.get("error") || "");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const oauthToken = searchParams.get("token");
-
-    if (oauthToken) {
-      setToken(oauthToken);
-      navigate("/dashboard", { replace: true });
-    }
-  }, [navigate, searchParams]);
 
   const handleChange = (e) => {
     setFormData({
@@ -39,15 +27,21 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setMessage("");
 
     try {
       setIsLoading(true);
-      const data = await loginUser(formData);
-      setToken(data.token);
-      navigate("/dashboard", { replace: true });
+      await registerUser(formData);
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+      });
+      navigate("/login", {
+        replace: true,
+        state: { message: "Registration successful. Please login." },
+      });
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -61,18 +55,30 @@ function Login() {
         <section className="mx-auto grid min-h-[70vh] max-w-7xl items-center px-4 py-14 sm:px-6">
           <div className="mx-auto w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-              <LockKeyhole className="h-6 w-6" aria-hidden="true" />
+              <UserPlus className="h-6 w-6" aria-hidden="true" />
             </div>
 
             <h1 className="mt-5 text-2xl font-semibold text-slate-950 dark:text-white">
-              Login
+              Create Account
             </h1>
 
             <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-              Login to continue using the AI Crop Advisory Platform.
+              Create your account to access the AI Crop Advisory Platform.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+              <Input
+                id="name"
+                name="name"
+                label="Name"
+                type="text"
+                placeholder="Enter your name"
+                value={formData.name}
+                onChange={handleChange}
+                disabled={isLoading}
+                required
+              />
+
               <Input
                 id="email"
                 name="email"
@@ -97,12 +103,6 @@ function Login() {
                 required
               />
 
-              {message ? (
-                <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                  {message}
-                </p>
-              ) : null}
-
               {error ? (
                 <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
                   {error}
@@ -110,18 +110,7 @@ function Login() {
               ) : null}
 
               <Button type="submit" className="w-full" isLoading={isLoading}>
-                Sign In
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  window.location.href = getGoogleLoginUrl();
-                }}
-              >
-                Continue with Google
+                Create Account
               </Button>
             </form>
           </div>
@@ -133,4 +122,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
