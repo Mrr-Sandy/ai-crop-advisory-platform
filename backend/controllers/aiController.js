@@ -1,0 +1,78 @@
+const GEMINI_MODEL = "gemini-flash-latest";
+
+let aiClientPromise;
+
+async function getAiClient() {
+  if (!aiClientPromise) {
+    aiClientPromise = import("@google/genai").then(({ GoogleGenAI }) => {
+      return new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+      });
+    });
+  }
+
+  return aiClientPromise;
+}
+
+async function chatWithAi(req, res) {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(503).json({
+        message: "Gemini API key is not configured",
+      });
+    }
+
+    const prompt = String(
+      req.body?.message || req.body?.prompt || req.body?.question || ""
+    ).trim();
+
+    if (!prompt) {
+      return res.status(400).json({
+        message: "A farming question is required",
+      });
+    }
+
+    const ai = await getAiClient();
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text:
+                "You are an AI crop advisory assistant. Give concise, practical farming guidance in plain language. If key details are missing, say what to provide next. Return plain text only.\n\nUser question: " +
+                prompt,
+            },
+          ],
+        },
+      ],
+      config: {
+        temperature: 0.4,
+        maxOutputTokens: 512,
+      },
+    });
+
+    const answer = String(response.text || "").trim();
+
+    if (!answer) {
+      return res.status(502).json({
+        message: "Gemini returned an empty response",
+      });
+    }
+
+    return res.status(200).json({
+      reply: answer,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "AI request failed",
+    });
+  }
+}
+
+module.exports = {
+  chatWithAi,
+};

@@ -10,6 +10,7 @@ const session = require("express-session");
 const passport = require("passport");
 const cropRoutes = require("./routes/cropRoute");
 const authRoutes = require("./routes/authRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const configurePassport = require("./config/passport");
 const app = express();
 
@@ -42,6 +43,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use("/api/crops",cropRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiRoutes);
 
 if (require.main === module) {
     app.listen(PORT,()=>{
