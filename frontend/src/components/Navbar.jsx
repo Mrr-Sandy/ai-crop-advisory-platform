@@ -69,6 +69,10 @@ function Navbar() {
             About
           </NavLink>
 
+          <NavLink to="/ai-assistant" className={navClass}>
+            AI Assistant
+          </NavLink>
+
           {token ? (
             <>
               <NavLink to="/dashboard" className={navClass}>

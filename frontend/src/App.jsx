@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AIAssistant from "./pages/AIAssistant";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route
             path="/dashboard"
             element={
