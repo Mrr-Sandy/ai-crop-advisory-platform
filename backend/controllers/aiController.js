@@ -37,16 +37,12 @@ async function chatWithAi(req, res) {
     const ai = await getAiClient();
     const response = await ai.models.generateContent({
       model: GEMINI_MODEL,
+      systemInstruction:
+        "You are an experienced agricultural expert. Respond with exactly 5 bullet points. Each bullet point must be 20-30 words and must include practical farmer-friendly advice. Bullet 1: likely cause or diagnosis. Bullet 2: immediate actions. Bullet 3: precautions and risks to avoid. Bullet 4: when professional agricultural help or a local extension officer is recommended. Bullet 5: closing recommendation. If details are missing, still provide the best probable advice instead of asking only for more information. Keep the full answer between 180 and 250 words. Return plain text only.",
       contents: [
         {
           role: "user",
-          parts: [
-            {
-              text:
-                "You are an AI crop advisory assistant. Give concise, practical farming guidance in plain language. If key details are missing, say what to provide next. Return plain text only.\n\nUser question: " +
-                prompt,
-            },
-          ],
+          parts: [{ text: prompt }],
         },
       ],
       config: {
