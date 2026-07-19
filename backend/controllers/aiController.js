@@ -2,6 +2,30 @@ const GEMINI_MODEL = "gemini-flash-latest";
 
 let aiClientPromise;
 
+function extractGeneratedText(response) {
+  const candidateParts = response?.candidates
+    ?.flatMap((candidate) => candidate?.content?.parts || [])
+    .map((part) => part?.text || "")
+    .join("")
+    .trim();
+
+  if (candidateParts) {
+    return candidateParts;
+  }
+
+  const outputParts = response?.output?.candidates
+    ?.flatMap((candidate) => candidate?.content?.parts || [])
+    .map((part) => part?.text || "")
+    .join("")
+    .trim();
+
+  if (outputParts) {
+    return outputParts;
+  }
+
+  return "";
+}
+
 async function getAiClient() {
   if (!aiClientPromise) {
     aiClientPromise = import("@google/genai").then(({ GoogleGenAI }) => {
@@ -47,11 +71,15 @@ async function chatWithAi(req, res) {
       ],
       config: {
         temperature: 0.4,
-        maxOutputTokens: 512,
+        maxOutputTokens: 1024,
+        thinkingConfig: {
+          includeThoughts: false,
+          thinkingBudget: 0,
+        },
       },
     });
 
-    const answer = String(response.text || "").trim();
+    const answer = extractGeneratedText(response);
 
     if (!answer) {
       return res.status(502).json({
