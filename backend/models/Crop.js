@@ -16,6 +16,11 @@ const cropSchema = new mongoose.Schema({
     water: {
         type: String,
         required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        index: true
     }
 });
 

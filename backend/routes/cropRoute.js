@@ -1,12 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const Crop = require("../models/Crop");
+const verifyToken = require("../middleware/verifyToken");
 
+function optionalVerifyToken(req, res, next) {
+    const authHeader = req.headers.authorization;
 
-router.get("/", async (req, res) => {
+    if (!authHeader) {
+        return next();
+    }
+
+    return verifyToken(req, res, next);
+}
+
+function getOwnerQuery(req) {
+    return req.user?.id ? { owner: req.user.id } : {};
+}
+
+router.get("/", optionalVerifyToken, async (req, res) => {
     try {
-        // Fetch every crop from MongoDB instead of reading from the old in-memory array.
-        const crops = await Crop.find();
+        const crops = await Crop.find(getOwnerQuery(req));
         res.status(200).json(crops);
     } catch (error) {
         // Return 500 when MongoDB or Mongoose cannot complete the read operation.
@@ -16,12 +29,12 @@ router.get("/", async (req, res) => {
     }
 });
 
-router.get("/search", async (req, res) => {
+router.get("/search", optionalVerifyToken, async (req, res) => {
     try {
         const name = req.query.name || "";
 
-        // Use a MongoDB case-insensitive regex query instead of filtering the old local array.
         const result = await Crop.find({
+            ...getOwnerQuery(req),
             name: {
                 $regex: name,
                 $options: "i"
@@ -37,10 +50,12 @@ router.get("/search", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", optionalVerifyToken, async (req, res) => {
     try {
-        // Look up the crop by its MongoDB document id instead of a numeric array id.
-        const crop = await Crop.findById(req.params.id);
+        const crop = await Crop.findOne({
+            _id: req.params.id,
+            ...getOwnerQuery(req)
+        });
 
         if (!crop) {
             return res.status(404).json({
@@ -66,10 +81,12 @@ router.get("/:id", async (req, res) => {
 
 
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
     try {
-        // Create and save a new MongoDB document instead of pushing into the old local array.
-        const newCrop = await Crop.create(req.body);
+        const newCrop = await Crop.create({
+            ...req.body,
+            owner: req.user.id
+        });
 
         res.status(201).json(newCrop);
     } catch (error) {
@@ -80,13 +97,20 @@ router.post("/", async (req, res) => {
     }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyToken, async (req, res) => {
     try {
-        // Update the MongoDB document by id and return the updated version to match the old API behavior.
-        const crop = await Crop.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
+        const { owner, ...updates } = req.body;
+        const crop = await Crop.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                owner: req.user.id
+            },
+            updates,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
 
         if (!crop) {
             return res.status(404).json({
@@ -110,10 +134,12 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken, async (req, res) => {
     try {
-        // Delete the MongoDB document by id instead of removing an item from the old local array.
-        const crop = await Crop.findByIdAndDelete(req.params.id);
+        const crop = await Crop.findOneAndDelete({
+            _id: req.params.id,
+            owner: req.user.id
+        });
 
         if (!crop) {
             return res.status(404).json({

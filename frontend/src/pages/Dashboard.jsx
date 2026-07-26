@@ -42,7 +42,25 @@ function normalizeForm(form) {
   };
 }
 
-function CropForm({ form, setForm, onSubmit, isSubmitting, submitLabel }) {
+function validateCropForm(form) {
+  const fields = {
+    name: "Crop name",
+    season: "Season",
+    soil: "Soil type",
+    water: "Water requirement",
+  };
+  const errors = {};
+
+  Object.entries(fields).forEach(([field, label]) => {
+    if (!form[field].trim()) {
+      errors[field] = `${label} is required.`;
+    }
+  });
+
+  return errors;
+}
+
+function CropForm({ form, setForm, onSubmit, isSubmitting, submitLabel, errors = {} }) {
   const fields = [
     ["name", "Crop name", "Rice"],
     ["season", "Season", "Kharif"],
@@ -54,23 +72,30 @@ function CropForm({ form, setForm, onSubmit, isSubmitting, submitLabel }) {
     <form className="grid gap-4" onSubmit={onSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         {fields.map(([field, label, placeholder]) => (
-          <Input
-            key={field}
-            id={`crop-${field}`}
-            label={label}
-            placeholder={placeholder}
-            value={form[field]}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                [field]: event.target.value,
-              }))
-            }
-            required
-          />
+          <div key={field} className="grid gap-2">
+            <Input
+              id={`crop-${field}`}
+              label={label}
+              placeholder={placeholder}
+              value={form[field]}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  [field]: event.target.value,
+                }))
+              }
+              disabled={isSubmitting}
+              required
+            />
+            {errors[field] ? (
+              <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                {errors[field]}
+              </p>
+            ) : null}
+          </div>
         ))}
       </div>
-      <Button type="submit" isLoading={isSubmitting} className="w-full sm:w-fit">
+      <Button type="submit" isLoading={isSubmitting} className="w-full sm:w-fit" disabled={isSubmitting}>
         {submitLabel}
       </Button>
     </form>
@@ -105,8 +130,10 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null);
   const [createForm, setCreateForm] = useState(emptyForm);
+  const [createErrors, setCreateErrors] = useState({});
   const [editCrop, setEditCrop] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [editErrors, setEditErrors] = useState({});
 
   const loadCrops = useCallback(async ({ query = "", signal } = {}) => {
     const trimmedQuery = query.trim();
@@ -196,11 +223,20 @@ function Dashboard() {
 
   async function handleCreate(event) {
     event.preventDefault();
+    const validationErrors = validateCropForm(createForm);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setCreateErrors(validationErrors);
+      setToast({ message: "Please complete all crop fields before creating a record.", tone: "error" });
+      return;
+    }
+
     const payload = normalizeForm(createForm);
 
     try {
       setIsSubmitting(true);
       setError("");
+      setCreateErrors({});
       await createCrop(payload);
       setCreateForm(emptyForm);
       setSearchTerm("");
@@ -216,6 +252,7 @@ function Dashboard() {
 
   function openEdit(crop) {
     setEditCrop(crop);
+    setEditErrors({});
     setEditForm({
       name: crop.name || "",
       season: crop.season || "",
@@ -227,11 +264,25 @@ function Dashboard() {
   async function handleUpdate(event) {
     event.preventDefault();
     const id = getCropId(editCrop);
+    const validationErrors = validateCropForm(editForm);
+
+    if (!id) {
+      setToast({ message: "Unable to update this crop because its record id is missing.", tone: "error" });
+      return;
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setEditErrors(validationErrors);
+      setToast({ message: "Please complete all crop fields before saving changes.", tone: "error" });
+      return;
+    }
+
     const payload = normalizeForm(editForm);
 
     try {
       setIsSubmitting(true);
       setError("");
+      setEditErrors({});
       await updateCrop(id, payload);
       setEditCrop(null);
       await loadCrops({ query: searchTerm });
@@ -245,6 +296,11 @@ function Dashboard() {
 
   async function handleDelete(crop) {
     const id = getCropId(crop);
+
+    if (!id) {
+      setToast({ message: "Unable to delete this crop because its record id is missing.", tone: "error" });
+      return;
+    }
 
     try {
       setIsDeletingId(id);
@@ -308,6 +364,7 @@ function Dashboard() {
                 onSubmit={handleCreate}
                 isSubmitting={isSubmitting && !editCrop}
                 submitLabel="Create crop"
+                errors={createErrors}
               />
             </section>
 
@@ -330,7 +387,7 @@ function Dashboard() {
                     onChange={(event) => setSearchTerm(event.target.value)}
                     className="sm:w-64"
                   />
-                  <Button type="submit" isLoading={isSearching} className="self-end">
+                  <Button type="submit" isLoading={isSearching} className="self-end" disabled={isSearching}>
                     <Search className="h-4 w-4" aria-hidden="true" />
                     Search
                   </Button>
@@ -405,6 +462,7 @@ function Dashboard() {
                             variant="outline"
                             className="h-9 min-h-9 px-3"
                             onClick={() => openEdit(crop)}
+                            disabled={Boolean(isDeletingId)}
                             aria-label={`Edit ${crop.name}`}
                           >
                             <Pencil className="h-4 w-4" aria-hidden="true" />
@@ -414,6 +472,7 @@ function Dashboard() {
                             className="h-9 min-h-9 px-3"
                             onClick={() => handleDelete(crop)}
                             isLoading={isDeletingId === id}
+                            disabled={Boolean(isDeletingId)}
                             aria-label={`Delete ${crop.name}`}
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -440,6 +499,7 @@ function Dashboard() {
           onSubmit={handleUpdate}
           isSubmitting={isSubmitting && Boolean(editCrop)}
           submitLabel="Save changes"
+          errors={editErrors}
         />
       </Modal>
 
