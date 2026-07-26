@@ -17,7 +17,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/ai-assistant" element={<AIAssistant />} />
+            <Route
+              path="/ai-assistant"
+              element={
+                <ProtectedRoute>
+                  <AIAssistant />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/dashboard"
               element={
