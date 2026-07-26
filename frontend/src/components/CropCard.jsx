@@ -3,16 +3,16 @@ import { Droplets, Sprout, SunMedium } from "lucide-react";
 function CropCard({ crop, actions }) {
   return (
     <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:border-green-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
             Crop profile
           </p>
-          <h3 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">
+          <h3 className="mt-1 break-words text-xl font-semibold text-slate-950 dark:text-white">
             {crop.name}
           </h3>
         </div>
-        {actions ? <div className="flex shrink-0 gap-2">{actions}</div> : null}
+        {actions ? <div className="flex shrink-0 gap-2 self-start">{actions}</div> : null}
       </div>
 
       <dl className="mt-5 grid gap-3 text-sm text-slate-600 dark:text-slate-300">

@@ -4,6 +4,7 @@ import {
   Pencil,
   Plus,
   Search,
+  ShieldAlert,
   Sprout,
   Trash2,
 } from "lucide-react";
@@ -13,7 +14,7 @@ import CropCard from "../components/CropCard";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import WeatherWidget from "../components/WeatherWidget";
-import { Button, Input, Loader, Modal, Toast } from "../components/ui";
+import { Button, EmptyState, Input, Loader, Modal, Toast } from "../components/ui";
 import {
   createCrop,
   deleteCrop,
@@ -134,6 +135,7 @@ function Dashboard() {
   const [editCrop, setEditCrop] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
   const [editErrors, setEditErrors] = useState({});
+  const [deleteCropTarget, setDeleteCropTarget] = useState(null);
 
   const loadCrops = useCallback(async ({ query = "", signal } = {}) => {
     const trimmedQuery = query.trim();
@@ -206,6 +208,8 @@ function Dashboard() {
     ];
   }, [crops]);
 
+  const hasActiveFilters = Boolean(searchTerm.trim()) || seasonFilter !== "all";
+
   async function handleSearch(event) {
     event.preventDefault();
 
@@ -216,6 +220,20 @@ function Dashboard() {
       await loadCrops({ query: searchTerm });
     } catch {
       setError("Search failed. Please confirm the backend is running.");
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  async function clearFilters() {
+    try {
+      setIsSearching(true);
+      setError("");
+      setSearchTerm("");
+      setSeasonFilter("all");
+      await loadCrops({ query: "" });
+    } catch {
+      setError("Unable to reload crops. Please confirm the backend is running.");
     } finally {
       setIsSearching(false);
     }
@@ -294,8 +312,12 @@ function Dashboard() {
     }
   }
 
-  async function handleDelete(crop) {
-    const id = getCropId(crop);
+  function requestDelete(crop) {
+    setDeleteCropTarget(crop);
+  }
+
+  async function confirmDelete() {
+    const id = getCropId(deleteCropTarget);
 
     if (!id) {
       setToast({ message: "Unable to delete this crop because its record id is missing.", tone: "error" });
@@ -307,6 +329,7 @@ function Dashboard() {
       setError("");
       await deleteCrop(id);
       setCrops((current) => current.filter((item) => getCropId(item) !== id));
+      setDeleteCropTarget(null);
       setToast({ message: "Crop deleted successfully.", tone: "success" });
     } catch (err) {
       setToast({ message: err.message || "Unable to delete crop.", tone: "error" });
@@ -321,9 +344,9 @@ function Dashboard() {
 
       <main className="bg-slate-50 dark:bg-slate-950">
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
                   Operations dashboard
                 </p>
@@ -336,7 +359,7 @@ function Dashboard() {
                   routes without changing methods or response structures.
                 </p>
               </div>
-              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-100">
+              <div className="break-words rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-100">
                 API chain: `/api/crops` to React state to UI
               </div>
             </div>
@@ -378,16 +401,16 @@ function Dashboard() {
                     Search calls the existing backend search endpoint.
                   </p>
                 </div>
-                <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleSearch}>
+                <form className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto" onSubmit={handleSearch}>
                   <Input
                     id="crop-search"
                     label="Search crops"
                     placeholder="Search by name"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    className="sm:w-64"
+                    className="w-full sm:w-64"
                   />
-                  <Button type="submit" isLoading={isSearching} className="self-end" disabled={isSearching}>
+                  <Button type="submit" isLoading={isSearching} className="w-full sm:w-fit sm:self-end" disabled={isSearching}>
                     <Search className="h-4 w-4" aria-hidden="true" />
                     Search
                   </Button>
@@ -443,9 +466,26 @@ function Dashboard() {
             )}
 
             {!isLoading && !error && visibleCrops.length === 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-                No crop records match the current search and filter.
-              </div>
+              <EmptyState
+                title={hasActiveFilters ? "No search results" : "No crops available"}
+                message={
+                  hasActiveFilters
+                    ? "No crop records match your current search or season filter. Try clearing the search or selecting all seasons."
+                    : "Create your first crop record with the form above. It will be saved to your authenticated account."
+                }
+                action={
+                  hasActiveFilters ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={clearFilters}
+                      isLoading={isSearching}
+                    >
+                      Clear filters
+                    </Button>
+                  ) : null
+                }
+              />
             )}
 
             {!isLoading && !error && visibleCrops.length > 0 && (
@@ -470,7 +510,7 @@ function Dashboard() {
                           <Button
                             variant="danger"
                             className="h-9 min-h-9 px-3"
-                            onClick={() => handleDelete(crop)}
+                            onClick={() => requestDelete(crop)}
                             isLoading={isDeletingId === id}
                             disabled={Boolean(isDeletingId)}
                             aria-label={`Delete ${crop.name}`}
@@ -501,6 +541,45 @@ function Dashboard() {
           submitLabel="Save changes"
           errors={editErrors}
         />
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(deleteCropTarget)}
+        title="Delete crop record"
+        onClose={() => setDeleteCropTarget(null)}
+      >
+        <div className="grid gap-5">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
+              <ShieldAlert className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold">{deleteCropTarget?.name || "this crop"}</span>?
+                This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteCropTarget(null)}
+              disabled={Boolean(isDeletingId)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              onClick={confirmDelete}
+              isLoading={Boolean(isDeletingId)}
+            >
+              Delete crop
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       <Footer />

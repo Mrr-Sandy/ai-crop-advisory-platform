@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import Card from "../components/Card";
 import Footer from "../components/Footer";
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
-import { Loader } from "../components/ui";
+import { EmptyState, Loader } from "../components/ui";
 import { getCrops } from "../api/crops";
 
 function Home() {
@@ -75,9 +76,18 @@ function Home() {
           )}
 
           {!isLoading && !error && crops.length === 0 && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-              No crop records were returned by the backend.
-            </div>
+            <EmptyState
+              title="No crops available"
+              message="The backend did not return any crop records yet. Add crops from the dashboard after signing in."
+              action={
+                <Link
+                  to="/dashboard"
+                  className="inline-flex min-h-10 items-center justify-center rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+                >
+                  Open dashboard
+                </Link>
+              }
+            />
           )}
 
           {!isLoading && !error && crops.length > 0 && (

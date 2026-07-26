@@ -1,9 +1,10 @@
 import { Bot, MessageSquareText, SendHorizonal, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { Button, Loader, Toast } from "../components/ui";
+import { Button, EmptyState, Loader, Toast } from "../components/ui";
 import { sendAiQuestion } from "../api/ai";
 import { getCrops } from "../api/crops";
 
@@ -131,9 +132,18 @@ function AIAssistant() {
                     </button>
                   ))
                 ) : (
-                  <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-                    Add crop records to see AI question suggestions.
-                  </p>
+                  <EmptyState
+                    title="No crop prompts yet"
+                    message="Add crop records in the dashboard to generate question ideas from your own data."
+                    action={
+                      <Link
+                        to="/dashboard"
+                        className="inline-flex min-h-10 items-center justify-center rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+                      >
+                        Add crop records
+                      </Link>
+                    }
+                  />
                 )}
               </div>
             </div>
@@ -212,9 +222,10 @@ function AIAssistant() {
                       {answer}
                     </p>
                   ) : (
-                    <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                      The answer will appear here after you submit a question.
-                    </p>
+                    <EmptyState
+                      title="No AI response yet"
+                      message="Submit a farming question to see AI guidance here. Responses preserve line breaks and plain-text formatting."
+                    />
                   )}
                 </div>
               </div>
