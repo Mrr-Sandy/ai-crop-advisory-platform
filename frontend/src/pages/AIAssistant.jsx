@@ -1,24 +1,59 @@
 import { Sparkles, SendHorizonal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { Button, Loader } from "../components/ui";
+import { Button, Loader, Toast } from "../components/ui";
 import { sendAiQuestion } from "../api/ai";
+import { getCrops } from "../api/crops";
 
-const suggestedQuestions = [
-  "What irrigation advice should I follow for paddy during hot weather?",
-  "How can I improve soil health before planting vegetables?",
-  "What crop management steps help reduce pest damage in rainy season?",
-];
+function buildSuggestedQuestions(crops) {
+  return crops
+    .filter((crop) => crop?.name)
+    .slice(0, 3)
+    .map((crop) => {
+      const cropName = crop.name;
+      const season = crop.season ? ` during ${crop.season} season` : "";
+      const soil = crop.soil ? ` in ${crop.soil} soil` : "";
+      return `What practical advice should I follow for ${cropName}${season}${soil}?`;
+    });
+}
 
 function AIAssistant() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
+  const [suggestionError, setSuggestionError] = useState("");
 
   const canSubmit = useMemo(() => question.trim().length > 0 && !isLoading, [question, isLoading]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadSuggestedQuestions() {
+      try {
+        setIsLoadingSuggestions(true);
+        setSuggestionError("");
+        const crops = await getCrops({ signal: controller.signal });
+        setSuggestedQuestions(buildSuggestedQuestions(crops));
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setSuggestionError("Unable to load crop-based suggestions.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingSuggestions(false);
+        }
+      }
+    }
+
+    loadSuggestedQuestions();
+
+    return () => controller.abort();
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -66,20 +101,34 @@ function AIAssistant() {
               </p>
 
               <div className="mt-6 grid gap-3">
-                {suggestedQuestions.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setQuestion(item)}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-700 transition-colors hover:border-green-300 hover:bg-green-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-green-800 dark:hover:bg-green-950"
-                  >
-                    {item}
-                  </button>
-                ))}
+                {isLoadingSuggestions ? (
+                  <Loader text="Loading crop-based suggestions..." />
+                ) : suggestedQuestions.length > 0 ? (
+                  suggestedQuestions.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setQuestion(item)}
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-700 transition-colors hover:border-green-300 hover:bg-green-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-green-800 dark:hover:bg-green-950"
+                    >
+                      {item}
+                    </button>
+                  ))
+                ) : (
+                  <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+                    Add crop records to see AI question suggestions.
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              {suggestionError ? (
+                <div className="mb-4">
+                  <Toast message={suggestionError} tone="error" />
+                </div>
+              ) : null}
+
               <form onSubmit={handleSubmit} className="grid gap-4">
                 <label htmlFor="ai-question" className="text-sm font-medium text-slate-800 dark:text-slate-100">
                   Your question

@@ -1,3 +1,5 @@
+import { getToken } from "./auth";
+
 const AI_API_URL = "/api/ai";
 
 async function parseAiResponse(response) {
@@ -11,11 +13,18 @@ async function parseAiResponse(response) {
 }
 
 export async function sendAiQuestion(question) {
+  const token = getToken();
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${AI_API_URL}/chat`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify({ message: question }),
   });
 
