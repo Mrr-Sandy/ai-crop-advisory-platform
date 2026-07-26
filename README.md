@@ -1,6 +1,6 @@
 # AI Crop Advisory Platform
 
-AI Crop Advisory Platform is a React and Express application for managing crop information such as crop name, season, soil type, and water requirement. The frontend presents the data as a professional SaaS interface while preserving the completed backend contract.
+AI Crop Advisory Platform is a React and Express application for managing authenticated crop information such as crop name, season, soil type, and water requirement. The frontend presents the data as a professional SaaS interface while preserving the completed backend contract.
 
 ## Screenshots
 
@@ -9,6 +9,7 @@ Screenshots should be captured from the running product after deployment or loca
 - Dashboard crop management
 - Mobile dashboard layout
 - Dark mode dashboard
+- Authenticated AI Assistant page
 
 ## Folder Structure
 
@@ -39,7 +40,7 @@ ai-crop-advisory-platform/
 
 ## Backend Contract
 
-The backend exposes crop management APIs and authentication APIs. Frontend code uses the existing crop API without changing routes, methods, response structure, schema, controllers, models, or database integration.
+The backend exposes crop management APIs and authentication APIs. Frontend code uses the existing crop API routes and sends the stored JWT when a user is logged in so dashboard crop records are scoped to the authenticated account.
 
 ```text
 GET    /api/crops
@@ -56,6 +57,7 @@ Crop fields:
 - `season`
 - `soil`
 - `water`
+- `owner`
 
 ## Authentication
 
@@ -83,7 +85,7 @@ GET    /api/auth/google/callback
 Frontend features:
 - Working Register and Login pages
 - JWT storage in `localStorage`
-- Protected Dashboard route
+- Protected Dashboard and AI Assistant routes
 - Logout with token removal and redirect to Login
 - Navbar updates after login/logout
 - Loading states and user-friendly error messages
@@ -113,15 +115,19 @@ docs/design/00_DESIGN_VISION.md
 
 - Premium SaaS landing page
 - Real API-backed crop directory
+- Authenticated dashboard with user-scoped crop records
 - Dashboard with crop statistics derived from backend responses
 - Crop search through the existing search endpoint
 - Create crop through the existing POST endpoint
 - Update crop through the existing PUT endpoint
 - Delete crop through the existing DELETE endpoint
+- Delete confirmation dialog before destructive actions
+- Protected AI Assistant using the existing `/api/ai/chat` endpoint
 - Loading, empty, success, and error states
 - Dark mode
-- Responsive layouts
+- Responsive layouts with a compact mobile navigation menu
 - Accessible forms, buttons, dialogs, and status messaging
+- React Error Boundary fallback for unexpected rendering errors
 
 ## Setup Instructions
 
@@ -181,6 +187,16 @@ The Vite development server proxies `/api` to `http://localhost:5000`, so fronte
 4. Verify loading, error, search, create, update, delete, and empty states.
 5. Verify register, login, protected routes, logout, and Google OAuth after auth changes.
 6. Run lint and build checks.
+
+## Week 8 Completion Notes
+
+- Removed remaining mock-like frontend data from API-backed screens.
+- Connected crop and AI screens to live backend API helpers.
+- Protected Dashboard and AI Assistant with the existing JWT flow.
+- Completed CRUD UI with validation, loaders, success/error feedback, empty states, and delete confirmation.
+- Improved responsiveness for mobile, tablet, and desktop layouts.
+- Added reusable empty state and error boundary UI.
+- Removed React development `StrictMode` double-request behavior so Network tab no longer shows duplicate canceled startup requests.
 
 ## Documentation Guide
 

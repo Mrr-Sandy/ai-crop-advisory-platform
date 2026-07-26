@@ -84,16 +84,16 @@ function AIAssistant() {
       <Navbar />
 
       <main className="bg-slate-50 dark:bg-slate-950">
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:py-14">
           <div className="mb-8 max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm font-medium text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200">
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               AI crop advisory
             </p>
-            <h1 className="mt-4 text-3xl font-semibold text-slate-950 dark:text-white sm:text-4xl">
+            <h1 className="mt-4 text-2xl font-semibold text-slate-950 dark:text-white sm:text-4xl">
               Ask a field question and get practical crop guidance.
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:mt-4 sm:text-base">
               Describe the crop, season, soil, symptoms, or decision you are
               working through. The assistant uses the existing AI endpoint and
               returns plain-language recommendations.
@@ -101,7 +101,7 @@ function AIAssistant() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
                 <MessageSquareText className="h-6 w-6" aria-hidden="true" />
               </div>
@@ -109,7 +109,7 @@ function AIAssistant() {
               <p className="mt-5 text-sm font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
                 Crop-based prompts
               </p>
-              <h2 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">
+              <h2 className="mt-3 text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl">
                 Start with your live crop records.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -148,7 +148,7 @@ function AIAssistant() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
               {suggestionError ? (
                 <div className="mb-4">
                   <Toast message={suggestionError} tone="error" />
@@ -182,7 +182,7 @@ function AIAssistant() {
                   }}
                   placeholder="Example: My tomato crop is showing yellow leaves in clay loam soil during rainy season. What should I do first?"
                   rows={9}
-                  className="min-h-56 resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm leading-relaxed text-slate-950 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-green-700 focus:ring-2 focus:ring-green-700/15 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+                  className="min-h-48 w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm leading-relaxed text-slate-950 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-green-700 focus:ring-2 focus:ring-green-700/15 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 sm:min-h-56"
                   disabled={isLoading}
                   aria-describedby="ai-question-help"
                   required
@@ -199,7 +199,7 @@ function AIAssistant() {
                 </div>
               </form>
 
-              <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950">
+              <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 sm:p-5">
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-green-700 shadow-sm dark:bg-slate-900 dark:text-green-300">
                     <Bot className="h-5 w-5" aria-hidden="true" />

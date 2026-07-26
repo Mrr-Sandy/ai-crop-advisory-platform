@@ -105,11 +105,11 @@ function CropForm({ form, setForm, onSubmit, isSubmitting, submitLabel, errors =
 
 function StatCard({ icon: Icon, label, value, detail }) {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">{value}</p>
+          <p className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white sm:text-3xl">{value}</p>
         </div>
         <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
           <Icon className="h-5 w-5" aria-hidden="true" />
@@ -343,14 +343,14 @@ function Dashboard() {
       <Navbar />
 
       <main className="bg-slate-50 dark:bg-slate-950">
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
                   Operations dashboard
                 </p>
-                <h1 className="mt-2 text-3xl font-semibold text-slate-950 dark:text-white">
+                <h1 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white sm:text-3xl">
                   Crop management
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -367,17 +367,17 @@ function Dashboard() {
 
           <WeatherWidget />
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {stats.map((stat) => (
               <StatCard key={stat.label} {...stat} />
             ))}
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
               <div className="mb-5 flex items-center gap-2">
                 <Plus className="h-5 w-5 text-green-700" aria-hidden="true" />
-                <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
+                <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
                   Add crop
                 </h2>
               </div>
@@ -391,10 +391,10 @@ function Dashboard() {
               />
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
               <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
+                  <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
                     Search and filter
                   </h2>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
@@ -438,7 +438,7 @@ function Dashboard() {
           <section className="mt-6">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
+                <h2 className="text-lg font-semibold text-slate-950 dark:text-white sm:text-xl">
                   Crop records
                 </h2>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">

@@ -29,4 +29,4 @@ Record important UI decisions and their rationale.
 GitHub favors transparent dense data views; Stripe uses clear hierarchy for complex products; Vercel avoids unnecessary decoration.
 
 ## Implementation Notes
-Current decisions: preserve backend contracts, use real crop data only, hide weather UI until backend support exists, use Lucide React for icon consistency, and keep dashboard summaries derived from fetched crop records.
+Current decisions: preserve backend contracts, use real crop data only, protect Dashboard and AI Assistant with the existing JWT flow, hide weather UI until backend support exists, use Lucide React for icon consistency, keep dashboard summaries derived from fetched crop records, use confirmation dialogs for destructive actions, and keep mobile navigation compact to avoid small-screen overflow.

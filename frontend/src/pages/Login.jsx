@@ -58,8 +58,8 @@ function Login() {
       <Navbar />
 
       <main className="bg-slate-50 dark:bg-slate-950">
-        <section className="mx-auto grid min-h-[70vh] max-w-7xl items-center px-4 py-14 sm:px-6">
-          <div className="mx-auto w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <section className="mx-auto grid min-h-[64vh] max-w-7xl items-center px-4 py-10 sm:min-h-[70vh] sm:px-6 sm:py-14">
+          <div className="mx-auto w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
               <LockKeyhole className="h-6 w-6" aria-hidden="true" />
             </div>

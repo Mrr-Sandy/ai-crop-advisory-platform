@@ -20,10 +20,10 @@ Design tokens, reusable components, documentation, navigation, loading, error, a
 Premium public homepage with real crop preview from `GET /api/crops`.
 
 ## Phase 3: Dashboard
-API-backed dashboard with crop statistics, search, filters, crop cards, create, update, delete, and recent activity derived from real crop records.
+Completed API-backed dashboard with crop statistics, search, filters, crop cards, create, update, delete, validation, feedback states, and confirmation before delete.
 
 ## Phase 4: Authentication
-Login, register, profile, and settings screens after backend auth endpoints exist.
+Completed login, register, profile verification, protected Dashboard, protected AI Assistant, logout, and Google OAuth entry point using the existing auth endpoints.
 
 ## Phase 5: Analytics
 Charts and insights after backend analytics endpoints exist. Until then, only safe derived counts from crop records are visible.
@@ -35,8 +35,8 @@ Weather, recommendations, crop images, role-based workflows, export, pagination,
 `WeatherWidget` is a reusable hidden component because the backend does not currently expose weather data. It must remain hidden until a real endpoint exists.
 
 ## Examples
-- Supported now: crop CRUD and search.
-- Not supported now: live weather and AI recommendation streams.
+- Supported now: authenticated crop CRUD, search, protected AI Assistant, empty states, responsive mobile navigation, and error boundary fallback.
+- Not supported now: live weather and analytics charts.
 
 ## Do
 - Promote hidden components only after API contracts exist.

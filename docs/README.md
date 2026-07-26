@@ -30,6 +30,14 @@ Read `docs/design/00_DESIGN_VISION.md` first, then brand, color, typography, spa
 3. Implement the smallest frontend change that preserves backend contracts.
 4. Verify API loading, search, CRUD, loading states, and error states.
 
+## Current Implementation
+- Home loads crop records through the existing crop API.
+- Dashboard is protected by the existing JWT route guard and shows authenticated crop data.
+- AI Assistant is protected by the same route guard and uses the existing AI chat endpoint.
+- Crop CRUD includes client-side validation, loaders, success/error feedback, empty states, and delete confirmation.
+- Shared UI includes Button, Input, Loader, Toast, Modal, EmptyState, and ErrorBoundary patterns.
+- Mobile navigation uses a compact menu to avoid small-screen overflow.
+
 ## Best Practices
 - Reuse the existing `/api/crops` backend contract.
 - Bind UI to real data from MongoDB through Express APIs.
@@ -40,11 +48,13 @@ Read `docs/design/00_DESIGN_VISION.md` first, then brand, color, typography, spa
 - Crop cards use `GET /api/crops`.
 - Search uses `GET /api/crops/search?name=value`.
 - Create, update, and delete use the existing POST, PUT, and DELETE crop endpoints.
+- AI Assistant uses `POST /api/ai/chat`.
 
 ## Do
 - Document first.
 - Keep UI clean, accessible, and responsive.
 - Derive dashboard summaries from real crop data.
+- Protect authenticated workflows with the existing JWT flow.
 
 ## Don't
 - Modify backend routes, models, controllers, MongoDB logic, or response shapes.
@@ -55,4 +65,4 @@ Read `docs/design/00_DESIGN_VISION.md` first, then brand, color, typography, spa
 Vercel for restraint, Stripe for information hierarchy, GitHub for dense workflows, Notion for readable surfaces, and Material Design 3 for accessible component behavior.
 
 ## Implementation Notes
-The backend is production-ready. Frontend code may improve structure, styling, responsiveness, and accessibility, but must preserve API URLs, request methods, and response handling.
+The backend is production-ready. Frontend code may improve structure, styling, responsiveness, and accessibility, but must preserve API URLs, request methods, and response handling. Startup API requests should avoid duplicate development-only calls so browser Network debugging remains clear.

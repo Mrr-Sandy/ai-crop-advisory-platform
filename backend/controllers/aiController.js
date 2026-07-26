@@ -70,12 +70,7 @@ async function chatWithAi(req, res) {
         },
       ],
       config: {
-        temperature: 0.4,
         maxOutputTokens: 1024,
-        thinkingConfig: {
-          includeThoughts: false,
-          thinkingBudget: 0,
-        },
       },
     });
 
