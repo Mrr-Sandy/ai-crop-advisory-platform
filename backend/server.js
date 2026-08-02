@@ -16,12 +16,25 @@ const app = express();
 
 
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const CLIENT_URL = process.env.CLIENT_URL;
+const isProduction = process.env.NODE_ENV === "production";
+
+function isAllowedOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
+
+  if (CLIENT_URL && origin === CLIENT_URL) {
+    return true;
+  }
+
+  return !isProduction && /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+}
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.error(err));
 
 configurePassport();
 
@@ -30,12 +43,18 @@ app.get("/", (req,res)=>{
 });
 
 app.use(cors({
-  origin: CLIENT_URL,
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
 }));
 app.use(express.json());
 app.use(session({
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || "crop-advisory-session",
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
 }));

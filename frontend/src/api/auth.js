@@ -1,5 +1,5 @@
 const AUTH_API_URL = "/api/auth";
-const API_ORIGIN = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_ORIGIN = import.meta.env.VITE_API_URL;
 
 async function parseAuthResponse(response) {
   const data = await response.json().catch(() => ({}));
@@ -67,5 +67,9 @@ export async function getProfile({ signal } = {}) {
 }
 
 export function getGoogleLoginUrl() {
+  if (!API_ORIGIN) {
+    throw new Error("VITE_API_URL is not configured");
+  }
+
   return `${API_ORIGIN.replace(/\/$/, "")}/api/auth/google`;
 }

@@ -146,11 +146,11 @@ const getProfile = async (req, res) => {
 const googleCallback = (req, res) => {
   try {
     const token = createToken(req.user);
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const clientUrl = process.env.CLIENT_URL;
 
     res.redirect(`${clientUrl}/login?token=${encodeURIComponent(token)}`);
   } catch {
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const clientUrl = process.env.CLIENT_URL;
     res.redirect(`${clientUrl}/login?error=${encodeURIComponent("Google login failed")}`);
   }
 };

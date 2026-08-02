@@ -76,7 +76,7 @@ router.get(
   "/google/callback",
   requireGoogleConfig,
   passport.authenticate("google", {
-    failureRedirect: `${process.env.CLIENT_URL || "http://localhost:5173"}/login?error=Google%20login%20failed`,
+    failureRedirect: `${process.env.CLIENT_URL}/login?error=Google%20login%20failed`,
     session: false,
   }),
   googleCallback
