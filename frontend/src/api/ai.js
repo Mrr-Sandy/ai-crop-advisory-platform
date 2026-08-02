@@ -1,6 +1,12 @@
 import { getToken } from "./auth";
 
-const AI_API_URL = "/api/ai";
+const API_ORIGIN = import.meta.env.VITE_API_URL;
+
+if (!API_ORIGIN) {
+  throw new Error("VITE_API_URL is not configured");
+}
+
+const AI_API_URL = `${API_ORIGIN.replace(/\/$/, "")}/api/ai`;
 
 async function parseAiResponse(response) {
   const data = await response.json().catch(() => ({}));
@@ -14,6 +20,7 @@ async function parseAiResponse(response) {
 
 export async function sendAiQuestion(question) {
   const token = getToken();
+
   const headers = {
     "Content-Type": "application/json",
   };
