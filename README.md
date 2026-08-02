@@ -2,6 +2,41 @@
 
 AI Crop Advisory Platform is a React and Express application for managing authenticated crop information such as crop name, season, soil type, and water requirement. The frontend presents the data as a professional SaaS interface while preserving the completed backend contract.
 
+## Live Demo
+
+- Frontend URL: <PASTE YOUR VERCEL URL HERE>
+- Backend URL: <PASTE YOUR RENDER URL HERE>
+
+## Deployment
+
+- Frontend is deployed on Vercel.
+- Backend API is deployed on Render.
+- MongoDB Atlas is used as the cloud database.
+
+## Features
+
+- User Registration
+- User Login
+- JWT Authentication
+- Google OAuth Login
+- Protected Routes
+- Crop CRUD Operations
+- Crop Search
+- AI Crop Assistant
+- Responsive UI
+
+## Tech Stack
+
+- React + Vite
+- Node.js
+- Express.js
+- MongoDB Atlas
+- JWT Authentication
+- Google OAuth
+- Gemini AI API
+- Render
+- Vercel
+
 ## Screenshots
 
 Screenshots should be captured from the running product after deployment or local verification:
@@ -31,12 +66,41 @@ ai-crop-advisory-platform/
   vercel.json
 ```
 
-## Tech Stack
+## Environment Variables
+
+### Backend
+
+- `MONGO_URI`
+- `JWT_SECRET`
+- `SESSION_SECRET`
+- `GEMINI_API_KEY`
+- `CLIENT_URL`
+
+### Frontend
+
+- `VITE_API_URL`
+
+## Deployment Verification
+
+- Frontend deployed successfully.
+- Backend deployed successfully.
+- Authentication tested.
+- AI feature tested.
+- CRUD APIs tested.
+
+## Known Limitations
+
+- Render free tier may sleep after inactivity.
+- First API request may take 30–60 seconds.
+- Google OAuth requires proper credentials.
+
+## Stack Details
 
 - Frontend: React, Vite, React Router, Tailwind CSS, Lucide React
 - Backend: Node.js, Express, Mongoose, JWT, bcrypt, Passport.js
 - Database: MongoDB Atlas
-- Deployment config: Vercel rewrites for `/api`
+- Deployment: Vercel for frontend, Render for backend
+- AI: Gemini AI API
 
 ## Backend Contract
 
