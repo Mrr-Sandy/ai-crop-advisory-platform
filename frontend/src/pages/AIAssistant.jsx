@@ -1,36 +1,74 @@
-import { Bot, MessageSquareText, SendHorizonal, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Check, Copy, RotateCcw, SendHorizonal } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
+import AppShell from "../components/AppShell";
+import Consultation from "../components/Consultation";
+import MonthBand from "../components/MonthBand";
 import { Button, EmptyState, Loader, Toast } from "../components/ui";
 import { sendAiQuestion } from "../api/ai";
 import { getCrops } from "../api/crops";
+import { distinctCrops, questionFor, titleCase } from "../lib/crops";
+import { seasonOf, today } from "../lib/seasons";
 
-function buildSuggestedQuestions(crops) {
-  return crops
-    .filter((crop) => crop?.name)
-    .slice(0, 3)
-    .map((crop) => {
-      const cropName = crop.name;
-      const season = crop.season ? ` during ${crop.season} season` : "";
-      const soil = crop.soil ? ` in ${crop.soil} soil` : "";
-      return `What practical advice should I follow for ${cropName}${season}${soil}?`;
-    });
+function display(crop) {
+  return { ...crop, name: titleCase(crop.name), season: titleCase(crop.season), soil: titleCase(crop.soil), water: titleCase(crop.water) };
 }
 
+function followUps(crop) {
+  const soil = crop.soil.toLowerCase();
+  return [
+    questionFor(crop),
+    `How much water does ${crop.name} need in ${soil} soil, and how often should I irrigate?`,
+    `What pests and diseases should I watch for in ${crop.name} during ${crop.season}?`,
+    `How should I prepare ${soil} soil before sowing ${crop.name}?`,
+  ];
+}
+
+function findCrop(text, crops) {
+  const lower = String(text || "").toLowerCase();
+  return crops.find((crop) => crop.name && lower.includes(crop.name.toLowerCase())) || null;
+}
+
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="key key--ghost key--app"
+      onClick={() => {
+        navigator.clipboard?.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1600);
+        });
+      }}
+    >
+      {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+      <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
+    </button>
+  );
+}
+
+let nextId = 0;
+const makeId = () => `m${(nextId += 1)}`;
+
 function AIAssistant() {
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const [question, setQuestion] = useState(() => searchParams.get("q") || "");
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestedQuestions, setSuggestedQuestions] = useState([]);
+  const [error, setError] = useState("");
+  const [crops, setCrops] = useState([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(true);
   const [suggestionError, setSuggestionError] = useState("");
+  const [focusId, setFocusId] = useState(null);
+  const endRef = useRef(null);
+  const inputRef = useRef(null);
+  const now = today();
 
   const trimmedQuestion = question.trim();
   const canSubmit = useMemo(() => trimmedQuestion.length > 0 && !isLoading, [trimmedQuestion, isLoading]);
+  const unique = useMemo(() => distinctCrops(crops).map(display), [crops]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -39,8 +77,8 @@ function AIAssistant() {
       try {
         setIsLoadingSuggestions(true);
         setSuggestionError("");
-        const crops = await getCrops({ signal: controller.signal });
-        setSuggestedQuestions(buildSuggestedQuestions(crops));
+        const data = await getCrops({ signal: controller.signal });
+        setCrops(data);
       } catch (err) {
         if (err.name !== "AbortError") {
           setSuggestionError("Unable to load crop-based suggestions.");
@@ -57,10 +95,25 @@ function AIAssistant() {
     return () => controller.abort();
   }, []);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  useEffect(() => {
+    if (!messages.length && !isLoading) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    endRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "end" });
+  }, [messages, isLoading]);
 
-    if (!trimmedQuestion) {
+  // The crop in context: the one picked, else the one the latest question names, else the draft's.
+  const lastUser = [...messages].reverse().find((m) => m.role === "user");
+  const context =
+    unique.find((c) => (c._id || c.id || c.name) === focusId) ||
+    findCrop(lastUser?.text, unique) ||
+    findCrop(question, unique) ||
+    null;
+  const contextSeason = context ? seasonOf(context.season) : null;
+
+  async function ask(text) {
+    const asked = text.trim();
+
+    if (!asked) {
       setError("Please enter a farming question.");
       return;
     }
@@ -68,174 +121,302 @@ function AIAssistant() {
     try {
       setIsLoading(true);
       setError("");
-      setAnswer("");
+      setMessages((current) => [...current, { id: makeId(), role: "user", text: asked }]);
+      setQuestion("");
 
-      const data = await sendAiQuestion(trimmedQuestion);
-      setAnswer(data.reply || "No response was returned.");
+      const data = await sendAiQuestion(asked);
+      setMessages((current) => [
+        ...current,
+        { id: makeId(), role: "ai", text: data.reply || "No response was returned.", question: asked },
+      ]);
     } catch (err) {
-      setError(err.message || "Unable to get AI response.");
+      setMessages((current) => [
+        ...current,
+        { id: makeId(), role: "error", text: err.message || "Unable to get AI response.", question: asked },
+      ]);
     } finally {
       setIsLoading(false);
     }
   }
 
-  return (
-    <>
-      <Navbar />
+  function handleSubmit(event) {
+    event.preventDefault();
+    ask(question);
+  }
 
-      <main className="bg-slate-50 dark:bg-slate-950">
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:py-14">
-          <div className="mb-8 max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm font-medium text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              AI crop advisory
-            </p>
-            <h1 className="mt-4 text-2xl font-semibold text-slate-950 dark:text-white sm:text-4xl">
-              Ask a field question and get practical crop guidance.
+  function handleKeyDown(event) {
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      if (canSubmit) ask(question);
+    }
+  }
+
+  function pickSuggestion(text, crop) {
+    setQuestion(text);
+    if (crop) setFocusId(crop._id || crop.id || crop.name);
+    inputRef.current?.focus();
+  }
+
+  return (
+    <AppShell>
+      <div className="console">
+        <section className="console__thread" aria-labelledby="advisor-title">
+          <div className="border-b border-ink pb-6">
+            <p className="text-sm text-muted">Crop advisor</p>
+            <h1 id="advisor-title" className="mt-1 max-w-[22ch] text-[clamp(2rem,3.6vw,3.25rem)] leading-[1.02]">
+              What is happening in your field?
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:mt-4 sm:text-base">
-              Describe the crop, season, soil, symptoms, or decision you are
-              working through. The assistant uses the existing AI endpoint and
-              returns plain-language recommendations.
+            <p className="mt-3 max-w-[62ch] text-muted">
+              Describe the crop, season, soil, symptoms or weather. Each answer comes in five parts: the likely cause, what
+              to do now, what to watch for, when to call an expert, and a recommendation.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                <MessageSquareText className="h-6 w-6" aria-hidden="true" />
-              </div>
+          {suggestionError ? (
+            <div className="mt-4">
+              <Toast message={suggestionError} tone="error" />
+            </div>
+          ) : null}
 
-              <p className="mt-5 text-sm font-semibold uppercase tracking-normal text-green-700 dark:text-green-300">
-                Crop-based prompts
-              </p>
-              <h2 className="mt-3 text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl">
-                Start with your live crop records.
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                Suggestions are generated from crops returned by the backend,
-                so you can quickly ask about records already in the platform.
-              </p>
-
-              <div className="mt-6 grid gap-3">
+          <div className="grid flex-1 content-start gap-12 py-10" aria-live="polite">
+            {messages.length === 0 && !isLoading ? (
+              <div className="grid gap-4">
+                <p className="text-sm font-medium text-ink-2">Start with one of your crops. Each opens a question you can edit.</p>
                 {isLoadingSuggestions ? (
                   <Loader text="Loading crop-based suggestions..." />
-                ) : suggestedQuestions.length > 0 ? (
-                  suggestedQuestions.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setQuestion(item)}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm text-slate-700 transition-colors hover:border-green-300 hover:bg-green-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-green-800 dark:hover:bg-green-950"
-                    >
-                      {item}
-                    </button>
-                  ))
+                ) : unique.length > 0 ? (
+                  <div className="border-b border-rule">
+                    {unique.slice(0, 4).map((crop) => {
+                      const season = seasonOf(crop.season);
+                      return (
+                        <button
+                          key={crop._id || crop.id || crop.name}
+                          type="button"
+                          onClick={() => pickSuggestion(questionFor(crop), crop)}
+                          className="ask-row grid gap-1 sm:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] sm:items-baseline sm:gap-6"
+                          aria-label={questionFor(crop)}
+                        >
+                          <span className="font-display text-3xl">{crop.name}</span>
+                          <span className="flex items-center gap-2 text-muted">
+                            {season ? <span className="swatch" style={{ background: `var(--color-${season.key})` }} aria-hidden="true" /> : null}
+                            {crop.season} season, {crop.soil.toLowerCase()} soil, {crop.water.toLowerCase()} water
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : (
                   <EmptyState
                     title="No crop prompts yet"
                     message="Add crop records in the dashboard to generate question ideas from your own data."
                     action={
-                      <Link
-                        to="/dashboard"
-                        className="inline-flex min-h-10 items-center justify-center rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
-                      >
+                      <Link to="/dashboard" className="key key--ink key--app">
                         Add crop records
                       </Link>
                     }
                   />
                 )}
               </div>
-            </div>
+            ) : null}
 
-            <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-              {suggestionError ? (
-                <div className="mb-4">
-                  <Toast message={suggestionError} tone="error" />
-                </div>
-              ) : null}
-
-              {error ? (
-                <div className="mb-4">
-                  <Toast message={error} tone="error" />
-                </div>
-              ) : null}
-
-              <form onSubmit={handleSubmit} className="grid gap-5">
-                <div>
-                  <label htmlFor="ai-question" className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                    Farming question
-                  </label>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Include crop name, season, soil, symptoms, or weather context when you have it.
+            {messages.map((message) => {
+              if (message.role === "user") {
+                return (
+                  <div key={message.id} className="msg grid">
+                    <p className="msg--user whitespace-pre-wrap">{message.text}</p>
+                  </div>
+                );
+              }
+              if (message.role === "ai") {
+                const about = findCrop(message.question, unique);
+                const aboutSeason = about ? seasonOf(about.season) : null;
+                return (
+                  <article key={message.id} className="msg msg--ai" aria-label="AI response">
+                    <div className="answerhead">
+                      <p className="font-display text-xl">Advisor</p>
+                      {about ? (
+                        <span className="ctxchip">
+                          {aboutSeason ? <i style={{ background: `var(--color-${aboutSeason.key})` }} aria-hidden="true" /> : null}
+                          {about.name}, {about.season}, {about.soil.toLowerCase()} soil
+                        </span>
+                      ) : null}
+                      <span className="ml-auto">
+                        <CopyButton text={message.text} />
+                      </span>
+                    </div>
+                    <Consultation text={message.text} />
+                  </article>
+                );
+              }
+              return (
+                <div key={message.id} className="msg msg--ai grid gap-3" role="alert">
+                  <p className="rounded-card bg-error-soft px-4 py-3 text-sm font-medium text-ink">
+                    The advisor could not answer: {message.text}
                   </p>
-                </div>
-
-                <textarea
-                  id="ai-question"
-                  value={question}
-                  onChange={(event) => {
-                    setQuestion(event.target.value);
-                    if (error) {
-                      setError("");
-                    }
-                  }}
-                  placeholder="Example: My tomato crop is showing yellow leaves in clay loam soil during rainy season. What should I do first?"
-                  rows={9}
-                  className="min-h-48 w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm leading-relaxed text-slate-950 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-green-700 focus:ring-2 focus:ring-green-700/15 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 sm:min-h-56"
-                  disabled={isLoading}
-                  aria-describedby="ai-question-help"
-                  required
-                />
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p id="ai-question-help" className="text-sm text-slate-500 dark:text-slate-400">
-                    {trimmedQuestion.length} characters entered
-                  </p>
-                  <Button type="submit" isLoading={isLoading} className="w-full sm:w-fit" disabled={!canSubmit}>
-                    {!isLoading ? <SendHorizonal className="h-4 w-4" aria-hidden="true" /> : null}
-                    {isLoading ? "Generating advice" : "Get advice"}
-                  </Button>
-                </div>
-              </form>
-
-              <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 sm:p-5">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-green-700 shadow-sm dark:bg-slate-900 dark:text-green-300">
-                    <Bot className="h-5 w-5" aria-hidden="true" />
-                  </span>
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-normal text-slate-500 dark:text-slate-400">
-                      AI response
-                    </p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Practical guidance appears here after submission.
-                    </p>
+                    <Button variant="outline" size="app" onClick={() => ask(message.question)} disabled={isLoading}>
+                      <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                      Ask again
+                    </Button>
                   </div>
                 </div>
+              );
+            })}
 
-                <div className="mt-5 min-h-40 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-                  {isLoading ? (
-                    <Loader text="Generating advisory response..." />
-                  ) : answer ? (
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                      {answer}
-                    </p>
-                  ) : (
-                    <EmptyState
-                      title="No AI response yet"
-                      message="Submit a farming question to see AI guidance here. Responses preserve line breaks and plain-text formatting."
-                    />
-                  )}
+            {isLoading ? (
+              <div className="msg msg--ai grid gap-4" role="status">
+                <p className="text-sm font-medium text-muted">Generating advisory response…</p>
+                <div className="thinking" aria-hidden="true">
+                  <span className="w-11/12" />
+                  <span className="w-9/12" />
+                  <span className="w-10/12" />
+                  <span className="w-7/12" />
+                  <span className="w-8/12" />
                 </div>
               </div>
-            </div>
+            ) : null}
+            <div ref={endRef} className="scroll-mb-48" />
           </div>
-        </section>
-      </main>
 
-      <Footer />
-    </>
+          <form onSubmit={handleSubmit} className="composer">
+            <label htmlFor="ai-question" className="sr-only">
+              Farming question
+            </label>
+            <div className="composer__box">
+              <textarea
+                id="ai-question"
+                ref={inputRef}
+                value={question}
+                onChange={(event) => {
+                  setQuestion(event.target.value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="My tomato crop has yellow leaves in clay loam soil during the rains. What should I do first?"
+                rows={2}
+                disabled={isLoading}
+                aria-describedby="ai-question-help"
+                required
+              />
+              <Button type="submit" isLoading={isLoading} disabled={!canSubmit}>
+                {!isLoading ? <SendHorizonal className="h-4 w-4" aria-hidden="true" /> : null}
+                {isLoading ? "Generating advice" : "Get advice"}
+              </Button>
+            </div>
+            <div className="mt-2 flex flex-wrap justify-between gap-2 text-sm text-muted">
+              <p id="ai-question-help" className="tnum">
+                {trimmedQuestion.length} characters entered. Enter to send, Shift and Enter for a new line.
+              </p>
+              {error ? (
+                <p className="font-medium text-error" role="alert">
+                  {error}
+                </p>
+              ) : null}
+            </div>
+          </form>
+        </section>
+
+        <aside className="console__aside" aria-labelledby="context-title">
+          <h2 id="context-title" className="text-2xl">
+            In context
+          </h2>
+          {context ? (
+            <div className="context-card mt-5">
+              <h3 className="text-3xl">{context.name}</h3>
+              <dl className="mt-4 grid grid-cols-3 gap-3">
+                <div>
+                  <dt>Season</dt>
+                  <dd>{context.season}</dd>
+                </div>
+                <div>
+                  <dt>Soil</dt>
+                  <dd>{context.soil}</dd>
+                </div>
+                <div>
+                  <dt>Water</dt>
+                  <dd>{context.water}</dd>
+                </div>
+              </dl>
+              <MonthBand current={now.month} focus={contextSeason?.key} className="mt-5" />
+              <p className="mt-3 text-sm text-[var(--color-on-night-muted)]">
+                {contextSeason ? contextSeason.note : "This season is not one of Kharif, Rabi or Zaid."}
+              </p>
+            </div>
+          ) : (
+            <div className="context-card mt-5">
+              <p className="text-sm text-[var(--color-on-night-muted)]">This month</p>
+              <h3 className="mt-1 text-3xl">{now.season.label} season</h3>
+              <p className="mt-2">{now.name}: {now.line}.</p>
+              <MonthBand current={now.month} focus={now.season.key} className="mt-5" />
+              <p className="mt-3 text-sm text-[var(--color-on-night-muted)]">{now.season.note}</p>
+              <p className="mt-5 text-sm text-[var(--color-on-night-muted)]">Your {now.season.label} crops</p>
+              {unique.filter((c) => seasonOf(c.season)?.key === now.season.key).length ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {unique
+                    .filter((c) => seasonOf(c.season)?.key === now.season.key)
+                    .map((crop) => (
+                      <button
+                        key={crop._id || crop.id || crop.name}
+                        type="button"
+                        className="cropchip cropchip--night"
+                        onClick={() => pickSuggestion(questionFor(crop), crop)}
+                      >
+                        {crop.name}, {crop.soil.toLowerCase()} soil
+                      </button>
+                    ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm">None yet.</p>
+              )}
+              <p className="mt-4 text-xs text-[var(--color-on-night-muted)]">Typical windows; they shift by region and with the rains.</p>
+            </div>
+          )}
+
+          {context ? (
+            <div className="mt-8">
+              <p className="text-sm font-medium text-ink-2">Ask next about {context.name}</p>
+              <div className="mt-2 border-b border-rule">
+                {followUps(context).map((item) => (
+                  <button key={item} type="button" className="ask-row text-sm" onClick={() => pickSuggestion(item, context)}>
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {messages.length > 0 || context ? (
+          <div className="mt-8">
+            <p className="text-sm font-medium text-ink-2">Your crops</p>
+            {isLoadingSuggestions ? (
+              <Loader text="Loading crops…" />
+            ) : unique.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {unique.slice(0, 10).map((crop) => {
+                  const id = crop._id || crop.id || crop.name;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      className="cropchip"
+                      aria-pressed={context ? (context._id || context.id || context.name) === id : false}
+                      onClick={() => setFocusId(id)}
+                    >
+                      {crop.name}, {crop.season}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-muted">No crop records yet.</p>
+            )}
+          </div>
+          ) : null}
+        </aside>
+      </div>
+    </AppShell>
   );
 }
 
