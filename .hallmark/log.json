@@ -3,6 +3,46 @@
   "mode": "redesign",
   "depth": "full",
   "scope": "site",
+  "shape": "Season Clock V2 Instrument",
+  "theme": "custom",
+  "axes": "light/display-heavy/chromatic-yellow",
+  "hero": "season photograph at depth of field behind a three.js wheat crop in a soil profile with a month ring, head stacked left, almanac strip",
+  "nav": "transparent bar; fixed night rail in app",
+  "footer": "mast with credits",
+  "imagery": "photographs, library 5, product screenshots 2, one 3D diagram",
+  "photos": [
+   "Woman_harvesting_wheat,_Raisen_district,_Madhya_Pradesh,_India_ggia_version.jpg",
+   "Water_reflection_of_a_boy_feeding_hay_to_a_cow_in_a_paddy_field_at_golden_hour_in_Laos.jpg",
+   "Monteregie_farmland_aerial_1_2025.jpg",
+   "Po_River_Delta_aerial_2.jpg",
+   "Wheat_and_chamomille,_Kalkense_Meersen,_Wetteren,_2026.jpg"
+  ],
+  "entry": "photo settles, 3D fades in, layers part on scroll",
+  "fingerprint": "light/display-heavy/chromatic-yellow/season-clock-v2/3d-hero/overlay-bar",
+  "sections": [
+   "3D season hero with almanac",
+   "Season tabs with inline crop facts",
+   "Sticky question with five-part answer",
+   "Water on the bias",
+   "Layered V2 product screenshots",
+   "Full-bleed close",
+   "Mast footer"
+  ],
+  "signature": "the season made physical: 3D wheat in its soil profile with the month ring",
+  "waived": [
+   "80",
+   "49b",
+   "44c",
+   "85",
+   "77"
+  ],
+  "prompt": "premium overhaul v2: Apple-level, sharp geometry, cinematic 3D hero",
+  "date": "2026-11-07"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
   "shape": "Season Clock",
   "theme": "custom",
   "axes": "light/display-heavy/chromatic-yellow",

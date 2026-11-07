@@ -11,6 +11,9 @@
 /* Hallmark · answered F15 · every section sets its width with the one .shell container; a browser probe at 1440 and 1920 finds no element 1472px wide, so the second width is a measurement of a grid track, not a second container */
 /* Hallmark · answered F8 · three scroll patterns, each with a job: the hero's layers part as you leave it (photo, plant and head at three speeds), photographs unveil as they enter, and section heads rise once; all off under reduced motion */
 /* Hallmark · dismissed 23 · the brass in .thinking is a sweep inside a 1px hairline, never a fill at viewport scale */
+/* Hallmark · hero-review: fix · 5 findings · 4 resolved 1 partial (no sowing-season photograph in the library; the owner's own is asked for) */
+/* Hallmark · finish-review: subagent · 7 findings · 6 resolved 1 no change (the water figure is the owner's real data, every local record says high) · gap: none */
+/* Hallmark · dismissed 28a-close · the closing photograph is lazy and below the fold; the hero photograph is the LCP */
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./base.css" layer(base);
