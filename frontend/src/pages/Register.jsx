@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserPlus } from "lucide-react";
 
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -51,26 +50,26 @@ function Register() {
     <>
       <Navbar />
 
-      <main className="bg-slate-50 dark:bg-slate-950">
-        <section className="mx-auto grid min-h-[64vh] max-w-7xl items-center px-4 py-10 sm:min-h-[70vh] sm:px-6 sm:py-14">
-          <div className="mx-auto w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-              <UserPlus className="h-6 w-6" aria-hidden="true" />
-            </div>
-
-            <h1 className="mt-5 text-2xl font-semibold text-slate-950 dark:text-white">
+      <main>
+        <section className="pt-16 pb-24">
+          <div className="shell grid items-start gap-12 lg:grid-cols-[5fr_6fr] lg:gap-24">
+            <div className="min-w-0">
+              <h1 className="text-display-s">
               Create Account
             </h1>
 
-            <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="lead mt-6 text-muted">
               Create your account to access the AI Crop Advisory Platform.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+            </div>
+
+            <form onSubmit={handleSubmit} className="panel grid gap-5 p-6 sm:p-10">
               <Input
                 id="name"
                 name="name"
                 label="Name"
+                autoComplete="name"
                 type="text"
                 placeholder="Enter your name"
                 value={formData.name}
@@ -84,6 +83,7 @@ function Register() {
                 name="email"
                 label="Email"
                 type="email"
+                autoComplete="email"
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
@@ -96,6 +96,7 @@ function Register() {
                 name="password"
                 label="Password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
@@ -104,7 +105,7 @@ function Register() {
               />
 
               {error ? (
-                <p className="text-sm font-medium text-red-700 dark:text-red-300" role="alert">
+                <p className="rounded-card bg-error-soft px-4 py-3 text-sm font-medium text-ink" role="alert">
                   {error}
                 </p>
               ) : null}
@@ -117,7 +118,7 @@ function Register() {
         </section>
       </main>
 
-      <Footer />
+      <Footer compact />
     </>
   );
 }

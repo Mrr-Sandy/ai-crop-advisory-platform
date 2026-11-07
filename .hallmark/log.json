@@ -1,0 +1,105 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Season Clock",
+  "theme": "custom",
+  "axes": "light/display-heavy/chromatic-yellow",
+  "hero": "season-chosen full-bleed photograph, split head, almanac strip overlapping its foot",
+  "nav": "transparent bar over the photograph; fixed night rail in the app",
+  "footer": "mast with credits",
+  "imagery": "photographs, library 5, product screenshots 2",
+  "photos": [
+   "Woman_harvesting_wheat,_Raisen_district,_Madhya_Pradesh,_India_ggia_version.jpg",
+   "Water_reflection_of_a_boy_feeding_hay_to_a_cow_in_a_paddy_field_at_golden_hour_in_Laos.jpg",
+   "Monteregie_farmland_aerial_1_2025.jpg",
+   "Po_River_Delta_aerial_2.jpg",
+   "Wheat_and_chamomille,_Kalkense_Meersen,_Wetteren,_2026.jpg"
+  ],
+  "entry": "photo settle, head and almanac rise once",
+  "fingerprint": "light/display-heavy/chromatic-yellow/season-clock/photo-hero/overlay-bar",
+  "sections": [
+   "Season hero with almanac strip",
+   "Season tabs showcase",
+   "Sticky question with five-part reveal",
+   "Water on the bias with real counts",
+   "Layered product screenshots",
+   "Serif audience statement",
+   "Full-bleed closing call",
+   "Mast footer"
+  ],
+  "signature": "the live month band with the users in-season crops",
+  "waived": [
+   "49b",
+   "44c",
+   "85",
+   "77"
+  ],
+  "prompt": "design revision: award-level, asymmetric, oversized type, full-bleed photography, signature hero",
+  "date": "2026-11-07"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Three Facts",
+  "theme": "custom",
+  "axes": "light/grotesk-sans/chromatic-yellow",
+  "hero": "full-bleed photograph with a record ledger at its foot",
+  "nav": "edge-aligned bar",
+  "footer": "mast with credits",
+  "imagery": "photographs, library 2",
+  "photos": [
+   "Woman_harvesting_wheat,_Raisen_district,_Madhya_Pradesh,_India_ggia_version.jpg",
+   "Water_reflection_of_a_boy_feeding_hay_to_a_cow_in_a_paddy_field_at_golden_hour_in_Laos.jpg"
+  ],
+  "entry": "none",
+  "fingerprint": "light/grotesk-sans/chromatic-yellow/custom/photo-hero/edge-bar",
+  "sections": [
+   "Photo hero with record ledger",
+   "Seasons index beside a photograph",
+   "Forest band: five-part answer anatomy",
+   "Water bars and table",
+   "Closing band with crop questions",
+   "Mast footer"
+  ],
+  "signature": "every AI answer laid out as a five-part consultation",
+  "waived": [
+   "49b",
+   "44c",
+   "85",
+   "77"
+  ],
+  "prompt": "complete visual reinvention: premium AgriTech, ivory, forest, olive, one accent",
+  "date": "2026-11-07"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Workbench",
+  "theme": "furrow",
+  "axes": "light/grotesk-sans/warm",
+  "hero": "Stage",
+  "nav": "slab",
+  "footer": "statement",
+  "imagery": "the crop API records on a generated survey map, no photographs",
+  "photos": [],
+  "entry": "none",
+  "fingerprint": "light/grotesk-sans/warm/Workbench/Stage/slab",
+  "sections": [
+   "Stage hero (survey map + notebook card)",
+   "Table (crop directory on the sheet)",
+   "Rows (three platform claims)",
+   "Statement footer"
+  ],
+  "signature": "the crop book pinned on a survey map, one record open as a notebook card",
+  "waived": [
+   "85",
+   "44c"
+  ],
+  "prompt": "redesign frontend/ of a crop records workspace and AI field advisor",
+  "date": "2026-11-07"
+ }
+]

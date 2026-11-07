@@ -12,7 +12,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-100">
+      <div className="min-h-dvh bg-paper text-ink">
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
